@@ -1,0 +1,86 @@
+USE Test
+
+
+ -- 1.	Вывести менеджеров у которых имеется номер телефона
+
+Select * from dbo.Managers Where Phone Is Not Null;  
+
+
+
+--2.	Вывести кол-во продаж за 20 июня 2021  
+
+Select Count(*) as 'Количество продаж за 2021-08-22'
+from Sells
+Where [Date] = '2021-08-22'
+
+
+ --3.	Вывести среднюю сумму продажи с товаром 'Фанера'
+
+ Select Name, Cost as 'Цена за штуку', Count(*) as 'Всего продано', SUM(Sells.[Sum]) as 'На сколько продано', AVG(Sells.[Sum]) as 'Ср.сумма'
+ from Product
+ Join Sells   on Product.ID=Sells.ID_Prod
+ Where Name='Фанера'
+ Group BY Name,Cost;
+
+
+
+ --4.	Вывести фамилии менеджеров и общую сумму продаж для каждого с товаром 'ОСБ'
+
+ Select FIO, Product.Name, SUM(Sells.[Sum]) as ‘Общая сумма’
+ from Managers
+ Join Sells on Managers.ID=Sells.ID_Manag
+ Join Product on Sells.ID_Prod=Product.ID
+ Where Product.Name = 'ОСБ'
+ Group By FIO,Product.Name
+
+
+
+ -- 5.	Вывести менеджера и товар, который продали 22 августа 2021
+
+ Select Managers.FIO as 'Менеджер', Product.Name as 'Название продукта', [Count], [Sum], [Date] 
+from dbo.Sells 
+Join Managers on Sells.ID_Manag = Managers.ID
+Join Product on Sells.ID_Prod = Product.ID
+ Where [Date]='2021-08-22'  
+
+
+
+ --6.	Вывести все товары, у которых в названии имеется 'Фанера' и цена не ниже 1750
+
+Select * 
+from Product
+Where Name Like '%Фанера%' AND Cost < 1750 
+
+
+
+
+--7.	Вывести историю продаж товаров, группируя по месяцу продажи и наименованию товара
+
+Select Product.Name, MONTH([Date]) as 'Месяц продажи' 
+from Sells
+join Product on Sells.ID_Prod = Product.ID
+Group By MONTH([Date]),Product.Name
+
+
+
+
+--8.	Вывести количество повторяющихся значений и сами значения из таблицы 'Товары', где количество повторений больше 1.
+ 
+Insert into Product values ('ОСБ-3 плита 2500*1250*6', 5430, 'шт'),('ОСБ-3 плита 2500*1250*6', 5430, 'шт'),('ОСБ-3 плита 2500*1250*6', 5430, 'шт')
+
+SELECT Name,  count(*) AS duplicate_count
+FROM Product
+Group By Name
+Having Count(*)>1 
+Union
+SELECT Cast(Cost as varchar) , count(*) AS duplicate_count
+FROM Product
+Group By Cost 
+Having Count(*)>1
+Union
+SELECT Volume,  count(*) AS duplicate_count
+FROM Product
+Group By Volume
+Having Count(*)>1 
+
+
